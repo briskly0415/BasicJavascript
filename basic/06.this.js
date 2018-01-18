@@ -1,3 +1,10 @@
+// 함수 호출 방식에 따른 this 바인딩
+// 1. 객체의 메서드를 호춣할때 this 바인딩
+// 2. 함수를 호출할 때 this 바인딩
+// 3. 내부 함수의 this 바인딩
+// 4. 생성자 함수를 호출할때 this 바인딩
+
+
 // // 객체의 메서드 호출할 때 this 바인딩
 // var myObject = {
 // 	name: 'foo',
@@ -34,34 +41,34 @@
 
 // window.sayFoo();
 
-// 내부 함수의 this 바인딩
-// 위의 예제와 같이 func1 에서의 this는 자신을 호출한 객체가 this 다.
-// 하지만 내부 함수의 경우 호출 패턴을 정의해 놓지 않아 this가 전역 객체가 된다.
-var value = 100;
+// // 내부 함수의 this 바인딩
+// // 위의 예제와 같이 func1 에서의 this는 자신을 호출한 객체가 this 다.
+// // 하지만 내부 함수의 경우 호출 패턴을 정의해 놓지 않아 this가 전역 객체가 된다.
+// var value = 100;
 
-var meObject = {
-	value: 1,
-  func1: function() {
-  	this.value += 1;
-    console.log('func1() 호출 this.value : ' + this.value);
+// var meObject = {
+// 	value: 1,
+//   func1: function() {
+//   	this.value += 1;
+//     console.log('func1() 호출 this.value : ' + this.value);
     
-    func2 = function() {
-    	this.value += 1;
-      console.log('func2() 호출 this.value : ' + this.value);
+//     func2 = function() {
+//     	this.value += 1;
+//       console.log('func2() 호출 this.value : ' + this.value);
       
-      func3 = function() {
-      	this.value += 1;
-        console.log('func3() 호출 this.value : ' + this.value);
-      }
+//       func3 = function() {
+//       	this.value += 1;
+//         console.log('func3() 호출 this.value : ' + this.value);
+//       }
       
-      func3();
-    }
+//       func3();
+//     }
     
-    func2();
-  }
-};
+//     func2();
+//   }
+// };
 
-meObject.func1();
+// meObject.func1();
 
 // // 위와 같은 현상을 피하기 위해 아래와 같이 코드를 짜기도 한다.
 // var value = 100;
@@ -127,26 +134,32 @@ meObject.func1();
 
 //console.dir(Person);   // __proto__ 프로퍼티에서 call, apply 메서드 확인
 
-function Person2(name, age, gender) {
-	this.name = name;
-  this.age = age;
-  this.gender = gender;
+// function Person2(name, age, gender) {
+//   console.log(this.__proto__ === Object.prototype);
+//   this.name = name;
+//   this.age = age;
+//   this.gender = gender;
+// };
+
+// var foo2 = new Person2('foo2', 30, 'man');
+
+// var foo3 = {};
+// Person2.apply(foo3, ['foo2', 30, 'man']);
+
+// console.log(foo2);
+// console.log(foo3);
+
+// apply 메서드를 이용해 유사배열객체를 배열처럼 사용
+function myFunction() {
+	console.log('myFunction arguments : ', arguments);
+  
+  var args = Array.prototype.slice.apply(arguments);
+  console.log('myFunction arguments alice : ', args);
 }
 
-var foo2 = {};
+myFunction(1, 2, 3);
 
-Person2.apply(foo2, ['foo2', 30, 'man']);
-console.dir(foo2);
-
-// // apply 메서드를 이용해 유사배열객체를 배열처럼 사용
-// function myFunction() {
-// 	console.log('myFunction arguments : ', arguments);
-  
-//   var args = Array.prototype.slice.apply(arguments);
-//   console.log('myFunction arguments alice : ', args);
-// }
-
-// myFunction(1, 2, 3);
+console.dir(myFunction);
 
 // // slice 메서드 예제
 // var arrA = [1, 2, 3];
