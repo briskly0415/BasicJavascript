@@ -1,0 +1,17 @@
+#git 기본 명령어
+
+#1. 인덱스에 추가
+git add <파일 이름>
+git add *
+
+#2. 인덱스에 추가된 내역을 커밋
+git commit -m "설명"
+
+#3. 커밋한 내용 원격 서버에 푸시
+git push origin master
+
+#4. 커밋 내용 조회
+git log
+
+#5. 현재 상태
+git status
