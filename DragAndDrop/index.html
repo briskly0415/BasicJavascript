@@ -123,9 +123,11 @@
 
             var ctx = ev.target.getContext("2d");
 
+            console.log(ev.clientX - ev.target.getBoundingClientRect().left, ev.clientY - ev.target.getBoundingClientRect().top);
+
             //ctx.clearRect(0, 0, ev.target.width, ev.target.height);
             ctx.fillStyle = backColor;
-            ctx.fillRect(25, 25, width, height);
+            ctx.fillRect(ev.clientX - ev.target.getBoundingClientRect().left, ev.clientY - ev.target.getBoundingClientRect().top, width, height);
             //ev.target.appendChild(document.getElementById(data));
         };
 
