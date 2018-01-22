@@ -1,71 +1,150 @@
 <!DOCTYPE html>
-<html><head>
-  <meta charset="utf-8">
-  <title>HTML5 Canvas Shape Edge Detection (for Arrow)</title>
-  <style type="text/css">
-    body { background:#eee; margin:2em 4em; text-align:center; }
-    canvas { background:#fff; border:1px solid #666 }
-  </style>
-</head><body>
-  <canvas width="800" height="600"></canvas>
-  <script type="text/javascript">
-    var width = window.innerWidth;
-    var height = window.innerHeight;
+<html>
 
-    var stage = new Konva.Stage({
-      container: 'container',
-      width: width,
-      height: height
-    });
+<head lang="en">
+    <meta charset="UTF-8">
+</head>
 
-    var layer = new Konva.Layer();
+<body>
+    <canvas id="main" width="500" height="500"></canvas>
 
-    var circle = new Konva.Circle({
-      x: stage.getWidth() / 2,
-      y: stage.getHeight() / 2,
-      radius: 40,
-      fill: 'green',
-      stroke: 'black',
-      strokeWidth: 2,
-      draggable: true
-    });
+    <script>
+        function CDraw(canvas) {
+            var ret = {
+                ctx: canvas.getContext("2d"),
+                bb: canvas.getBoundingClientRect(),
+                arrBox: [],
+                startX: 0,
+                startY: 0,
+                isDrag: false,
+                iBoxIndex: 0,
+                AddBox: function(iLeft, iTop, iWidth, iHeight) {
+                    var clsBox = {
+                        left: iLeft,
+                        top: iTop,
+                        width: iWidth,
+                        height: iHeight,
+                        lineTo: -1
+                    };
+                    var iBoxCount = this.arrBox.length;
 
-    var circleA = new Konva.Circle({
-      x: stage.getWidth() / 5,
-      y: stage.getHeight() / 5,
-      radius: 30,
-      fill: 'red',
-      stroke: 'black',
-      strokeWidth: 2,
-      draggable: true
-    });
+                    this.arrBox[iBoxCount] = clsBox;
 
-    var arrow = new Konva.Arrow({
-      points: [circle.getX(), circle.getY(), circleA.getX(), circleA.getY()],
-      pointerLength: 10,
-      pointerWidth: 10,
-      fill: 'black',
-      stroke: 'black',
-      strokeWidth: 4
-    });
+                    this.DrawBox();
+                },
+                AddLine: function(iStart, iEnd) {
 
-    function adjustPoint(e){
-      var p=[circle.getX(), circle.getY(), circleA.getX(), circleA.getY()];
-      arrow.setPoints(p);
-      layer.draw();
-    }
+                    var iCount = this.arrBox.length;
 
-    circle.on('dragmove', adjustPoint);
+                    if (iStart < 0 || iStart >= iCount) return;
+                    if (iEnd < 0 || iEnd >= iCount) return;
 
-    circleA.on('dragmove', adjustPoint);
+                    this.arrBox[iStart].lineTo = iEnd;
 
-    layer.add(circleA);
-    // add the shape to the layer
-    layer.add(circle);
-    layer.add(arrow);
+                    this.DrawBox();
+                },
+                MoveBox: function(iBoxIndex, iX, iY) {
+                    this.arrBox[iBoxIndex].left = this.arrBox[iBoxIndex].left + iX;
+                    this.arrBox[iBoxIndex].top = this.arrBox[iBoxIndex].top + iY;
 
-    // add the layer to the stage
-    stage.add(layer);
+                    this.DrawBox();
+                },
+                DrawBox: function() {
+                    var iBoxCount = this.arrBox.length;
 
-  </script>
-</body></html>
+                    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    for (var i = 0; i < iBoxCount; ++i) {
+                        var clsBox = this.arrBox[i];
+                        this.ctx.fillRect(clsBox.left, clsBox.top, clsBox.width, clsBox.height);
+
+                        if (clsBox.lineTo >= 0) {
+                            var clsLineBox = this.arrBox[clsBox.lineTo];
+
+                            if ((clsBox.left + clsBox.width) < clsLineBox.left) {
+                                this.DrawLine(clsBox.left + clsBox.width, clsBox.top + clsBox.height / 2, clsLineBox.left, clsLineBox.top + clsLineBox.height / 2);
+                            } else if ((clsLineBox.left + clsLineBox.width) < clsBox.left) {
+                                this.DrawLine(clsLineBox.left + clsLineBox.width, clsLineBox.top + clsLineBox.height / 2, clsBox.left, clsBox.top + clsBox.height / 2);
+                            } else if ((clsBox.top + clsBox.height) < clsLineBox.top) {
+                                this.DrawLine(clsBox.left + clsBox.width / 2, clsBox.top + clsBox.height, clsLineBox.left + clsLineBox.width / 2, clsLineBox.top);
+                            } else {
+                                this.DrawLine(clsLineBox.left + clsLineBox.width / 2, clsLineBox.top + clsLineBox.height, clsBox.left + clsBox.width / 2, clsBox.top);
+                            }
+                        }
+                    }
+                },
+                DrawLine: function(iStartX, iStartY, iEndX, iEndY) {
+                    var iHeadLen = 10;
+                    var iAngle = Math.atan2(iEndY - iStartY, iEndX - iStartX);
+
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(iStartX, iStartY);
+                    this.ctx.lineTo(iEndX, iEndY);
+
+                    this.ctx.lineTo(iEndX - iHeadLen * Math.cos(iAngle - Math.PI / 6), iEndY - iHeadLen * Math.sin(iAngle - Math.PI / 6));
+                    this.ctx.moveTo(iEndX, iEndY);
+                    this.ctx.lineTo(iEndX - iHeadLen * Math.cos(iAngle + Math.PI / 6), iEndY - iHeadLen * Math.sin(iAngle + Math.PI / 6));
+
+                    this.ctx.closePath();
+                    this.ctx.stroke();
+
+
+                },
+                mousedown: function(e) {
+                    this.startX = e.clientX - this.bb.left;
+                    this.startY = e.clientY - this.bb.top;
+
+                    var iBoxCount = this.arrBox.length;
+
+                    for (var i = 0; i < iBoxCount; ++i) {
+                        var clsBox = this.arrBox[i];
+
+                        if (this.startX > clsBox.left && this.startX < (clsBox.left + clsBox.width) && this.startY > clsBox.top && this.startY < (clsBox.top + clsBox.height)) {
+                            this.isDrag = true;
+                            this.iBoxIndex = i;
+                            break;
+                        }
+                    }
+                },
+                mousemove: function(e) {
+                    if (this.isDrag) {
+                        this.MoveBox(this.iBoxIndex, e.clientX - this.bb.left - this.startX, e.clientY - this.bb.top - this.startY);
+                        this.startX = e.clientX - this.bb.left;
+                        this.startY = e.clientY - this.bb.top;
+                    }
+                },
+                mouseup: function(e) {
+                    if (this.isDrag) {
+                        this.MoveBox(this.iBoxIndex, e.clientX - this.bb.left - this.startX, e.clientY - this.bb.top - this.startY);
+                        this.isDrag = false;
+                    }
+                }
+            };
+
+            canvas.addEventListener("mousemove", function(e) {
+                ret.mousemove(e);
+            });
+
+            canvas.addEventListener("mousedown", function(e) {
+                ret.mousedown(e);
+            });
+
+            canvas.addEventListener("mouseup", function(e) {
+                ret.mouseup(e);
+            });
+
+            return ret;
+        };
+
+        var clsDraw = new CDraw(document.getElementById("main"));
+
+        // 2개의 drag 되는 사각 박스를 그린다.
+        clsDraw.AddBox(20, 20, 100, 100);
+        clsDraw.AddBox(200, 200, 100, 100);
+
+        // 2개의 사각 박스를 화살표 라인으로 연결한다.
+        clsDraw.AddLine(0, 1);
+    </script>
+</body>
+
+</html>
