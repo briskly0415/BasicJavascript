@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html><head>
+  <meta charset="utf-8">
+  <title>HTML5 Canvas Shape Edge Detection (for Arrow)</title>
+  <style type="text/css">
+    body { background:#eee; margin:2em 4em; text-align:center; }
+    canvas { background:#fff; border:1px solid #666 }
+  </style>
+</head><body>
+  <canvas width="800" height="600"></canvas>
+  <script type="text/javascript">
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+
+    var stage = new Konva.Stage({
+      container: 'container',
+      width: width,
+      height: height
+    });
+
+    var layer = new Konva.Layer();
+
+    var circle = new Konva.Circle({
+      x: stage.getWidth() / 2,
+      y: stage.getHeight() / 2,
+      radius: 40,
+      fill: 'green',
+      stroke: 'black',
+      strokeWidth: 2,
+      draggable: true
+    });
+
+    var circleA = new Konva.Circle({
+      x: stage.getWidth() / 5,
+      y: stage.getHeight() / 5,
+      radius: 30,
+      fill: 'red',
+      stroke: 'black',
+      strokeWidth: 2,
+      draggable: true
+    });
+
+    var arrow = new Konva.Arrow({
+      points: [circle.getX(), circle.getY(), circleA.getX(), circleA.getY()],
+      pointerLength: 10,
+      pointerWidth: 10,
+      fill: 'black',
+      stroke: 'black',
+      strokeWidth: 4
+    });
+
+    function adjustPoint(e){
+      var p=[circle.getX(), circle.getY(), circleA.getX(), circleA.getY()];
+      arrow.setPoints(p);
+      layer.draw();
+    }
+
+    circle.on('dragmove', adjustPoint);
+
+    circleA.on('dragmove', adjustPoint);
+
+    layer.add(circleA);
+    // add the shape to the layer
+    layer.add(circle);
+    layer.add(arrow);
+
+    // add the layer to the stage
+    stage.add(layer);
+
+  </script>
+</body></html>

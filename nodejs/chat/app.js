@@ -4,9 +4,7 @@ var bodyParser  = require('body-parser');
 var session     = require("express-session");
 var redisStore  = require("connect-redis")(session);
 var redisClient = require("./redis.js");
-var passport    = require("./api/passport.js");
 
-app.use(passport.initialize());
 
 // 세션 레디스 연결
 app.use(session({
@@ -16,6 +14,12 @@ app.use(session({
     saveUninitialized: false,
     resave: false
 }));
+
+var passport    = require("./api/passport.js");
+
+app.use(passport.initialize());
+
+
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -31,18 +35,24 @@ app.get('/', function(req, res) {
         res.redirect("/login");
     }
     else {
-        res.sendfile(__dirname + '/static/index.html');
+        res.sendfile(__dirname + '/views/index.html');
     }
 
 });
 
 app.get('/login', function(req, res) {
-    res.sendfile(__dirname + '/static/member/login.html');
+    res.sendfile(__dirname + '/views/member/login.html');
 });
 
 app.post("/login", passport.authenticate("local", {
     failureRedirect: "/login"
 }), (req, res) => {
+
+    if(req.user) {
+        req.session.key = req.user.email;
+        req.session.value = req.user;
+    }
+
     res.redirect("/");
 });
 

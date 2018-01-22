@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        ul.nav.nav-sidebar.element li { display: table; margin-left: auto; margin-right: auto; }
+    </style>
+</head>
+<body>
+    
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">Drag&Drop</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-3 col-md-2 sidebar">
+                <ul class="nav nav-sidebar">
+                    <li class="active"><a href="#">Element <span class="sr-only">(current)</span></a></li>
+                </ul>
+                <ul class="nav nav-sidebar element">
+                    <li>
+                        <div id="rect01" style="width:50px; height:30px; background-color: brown;" draggable="true" ondragstart="drag(event)"></div>
+                    </li>
+                    <li>
+
+                    </li>
+                </ul>
+            </div>
+            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+                <h1 class="page-header">Dashboard<span id="coordinate" style="float: right;">X: 0, Y: 0</span></h1>
+                <canvas id="dashboard"  width="1000" height="700" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    Your browser does not support the HTML5 canvas tag.
+                </canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.7.21/fabric.min.js"></script>
+    <script>
+
+        // (function() {
+        //     var canvas = this.__canvas = new fabric.Canvas("dashboard");
+
+        //     var rect = new fabric.Rect({
+        //         left: 150,
+        //         top: 200,
+        //         originX: 'left',
+        //         originY: 'top',
+        //         width: 150,
+        //         height: 120,
+        //         fill: 'rgba(255,0,0,0.5)',
+        //         transparentCorners: false
+        //     });
+
+
+        //     canvas.add(rect).setActiveObject(rect);
+
+        // })();
+
+        (function(canvas) {
+            var ctx  = canvas.getContext("2d");
+            var size = canvas.getBoundingClientRect();
+            var arrCanvasRects = [];
+            var startX = 0;
+            var startY = 0;
+            var isDrag = false;
+            var iBoxIndex = 0;
+
+            canvas.addEventListener("mousemove", function(e) {
+                var x = e.clientX - size.left;
+                var y = e.clientY - size.top;
+
+                document.getElementById("coordinate").innerText = "X : " + x.toFixed(2) + ", Y :" + y.toFixed(2);
+            });
+
+            canvas.addEventListener("mousedown", function(e) {
+                console.log(e);
+            });
+
+            var Rect = function() {
+                
+            };
+
+        })(document.getElementById("dashboard"));
+
+        var canvas;
+        var ctx;
+
+        function init() {
+            canvas = document.getElementById("dashboard");
+            ctx = canvas.getContext("2d");
+            return setInterval(draw, 10);
+        };
+
+        function draw() {
+            
+        };
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+        };
+
+        function drop(ev) {
+            ev.preventDefault();
+
+            var data = ev.dataTransfer.getData("text");
+
+            var width     = document.getElementById(data).offsetWidth;
+            var height    = document.getElementById(data).offsetHeight;
+            var backColor = document.getElementById(data).style.backgroundColor;
+
+            var ctx = ev.target.getContext("2d");
+
+            //ctx.clearRect(0, 0, ev.target.width, ev.target.height);
+            ctx.fillStyle = backColor;
+            ctx.fillRect(25, 25, width, height);
+            //ev.target.appendChild(document.getElementById(data));
+        };
+
+        function drag(ev) {
+
+            // console.log(ev.target.id);
+
+            // ev.dataTransfer.setData("text", ev.target.id);
+            // dt.setDragImage(canvas, 25, 25);
+
+            var img = document.createElement("img");
+            ev.dataTransfer.setData("text", ev.target.id);
+            //ev.dataTransfer.setDragImage(img, 0, 0);
+        };
+
+        
+
+        function Element() {
+
+        };
+
+        function Rect() {
+
+        };
+    </script>
+</body>
+</html>
