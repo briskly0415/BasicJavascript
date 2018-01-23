@@ -3,17 +3,124 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/dashboard.css">
     <style>
+        /*
+        * Base structure
+        */
+
+        /* Move down content because we have a fixed navbar that is 50px tall */
+        body {
+        padding-top: 50px;
+        }
+
+
+        /*
+        * Global add-ons
+        */
+
+        .sub-header {
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+        }
+
+        /*
+        * Top navigation
+        * Hide default border to remove 1px line.
+        */
+        .navbar-fixed-top {
+        border: 0;
+        }
+
+        /*
+        * Sidebar
+        */
+
+        /* Hide for mobile, show later */
+        .sidebar {
+        display: none;
+        }
+        @media (min-width: 768px) {
+        .sidebar {
+            position: fixed;
+            top: 51px;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            display: block;
+            padding: 20px;
+            overflow-x: hidden;
+            overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+            background-color: #f5f5f5;
+            border-right: 1px solid #eee;
+        }
+        }
+
+        /* Sidebar navigation */
+        .nav-sidebar {
+        margin-right: -21px; /* 20px padding + 1px border */
+        margin-bottom: 20px;
+        margin-left: -20px;
+        }
+        .nav-sidebar > li > a {
+        padding-right: 20px;
+        padding-left: 20px;
+        }
+        .nav-sidebar > .active > a,
+        .nav-sidebar > .active > a:hover,
+        .nav-sidebar > .active > a:focus {
+        color: #fff;
+        background-color: #428bca;
+        }
+
+
+        /*
+        * Main content
+        */
+
+        .main {
+        padding: 20px;
+        }
+        @media (min-width: 768px) {
+        .main {
+            padding-right: 40px;
+            padding-left: 40px;
+        }
+        }
+        .main .page-header {
+        margin-top: 0;
+        }
+
+
+        /*
+        * Placeholder dashboard ideas
+        */
+
+        .placeholders {
+        margin-bottom: 30px;
+        text-align: center;
+        }
+        .placeholders h4 {
+        margin-bottom: 0;
+        }
+        .placeholder {
+        margin-bottom: 20px;
+        }
+        .placeholder img {
+        display: inline-block;
+        border-radius: 50%;
+        }
+
+
+
         ul.nav.nav-sidebar.element li {
             display: table;
             margin-left: auto;
             margin-right: auto;
+            margin-top: 5px;
         }
     </style>
 </head>
@@ -35,98 +142,271 @@
                     <li class="active"><a href="#">Element <span class="sr-only">(current)</span></a></li>
                 </ul>
                 <ul class="nav nav-sidebar element">
-                    <li>
-                        <div id="rect01" style="width:50px; height:30px; background-color: brown;" draggable="true" ondragstart="drag(event)"></div>
-                    </li>
-                    <li>
-
-                    </li>
+                    <li><div id="rect01" style="width:100px; height:60px; background-color: #BCE067;" draggable="true" ondragstart="drag(event)"></div></li>
+                    <li><div id="rect02" style="width:100px; height:60px; background-color: #FF007F;" draggable="true" ondragstart="drag(event)"></div></li>
+                    <li><div id="rect03" style="width:100px; height:60px; background-color: #FFE400;" draggable="true" ondragstart="drag(event)"></div></li>
+                    <li><div id="rect04" style="width:100px; height:60px; background-color: #8C8C8C;" draggable="true" ondragstart="drag(event)"></div></li>
                 </ul>
             </div>
             <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-                <h1 class="page-header">Dashboard<span id="coordinate" style="float: right;">X: 0, Y: 0</span></h1>
-                <canvas id="dashboard" width="1000" height="700" ondrop="drop(event)" ondragover="allowDrop(event)">
+                <h1 class="page-header">Dashboard<!-- <span id="coordinate" style="float: right;">X: 0, Y: 0</span> --> </h1>
+                <canvas id="dashboard" width="1500" height="900" ondrop="drop(event)" ondragover="allowDrop(event)">
                     Your browser does not support the HTML5 canvas tag.
                 </canvas>
             </div>
         </div>
     </div>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.7.21/fabric.min.js"></script>
     <script>
-        // (function(canvas) {
-        //     var ctx = canvas.getContext("2d");
-        //     var size = canvas.getBoundingClientRect();
-        //     var arrCanvasRects = [];
-        //     var startX = 0;
-        //     var startY = 0;
-        //     var isDrag = false;
-        //     var iBoxIndex = 0;
+        function CDraw(canvas) {
+            var ret = {
+                ctx: canvas.getContext("2d"),
+                bb: canvas.getBoundingClientRect(),
+                arrBox: [],
+                startX: 0,
+                startY: 0,
+                isDrag: false,
+                iBoxIndex: 0,
+                iConnectBoxIndex: -1,
+                iConnectBoxDirection: "",
+                AddBox: function(iLeft, iTop, iWidth, iHeight, iBackColor) {
 
-        //     canvas.addEventListener("mousemove", function(e) {
-        //         var x = e.clientX - size.left;
-        //         var y = e.clientY - size.top;
+                    var clsBox = {
+                        left: iLeft,
+                        top: iTop,
+                        width: iWidth,
+                        height: iHeight,
+                        backColor: iBackColor,
+                        lineTo: -1,
+                        leftBox: {
+                            left: iLeft - 20,
+                            top: iTop + (iHeight / 2) - 10,
+                            width: 20,
+                            height: 20,
+                            backColor: '#6798FD',
+                            lineTo: -1,
+                            lineDirection: ''
+                        },
+                        rightBox:  {
+                            left: iLeft + iWidth,
+                            top:  iTop + (iHeight / 2) - 10,
+                            width: 20,
+                            height: 20,
+                            backColor: '#6798FD',
+                            lineTo: -1,
+                            lineDirection: ''
+                        }
+                    };
 
-        //         document.getElementById("coordinate").innerText = "X : " + x.toFixed(2) + ", Y :" + y.toFixed(2);
-        //     });
+                    var iBoxCount = this.arrBox.length;
+                    this.arrBox[iBoxCount] = clsBox;
+                    this.DrawBox();
+                },
+                AddLine: function(iStart, iEnd, iDirection) {
 
-        //     canvas.addEventListener("mousedown", function(e) {
-        //         console.log(e);
-        //     });
+                    var iCount = this.arrBox.length;
 
-        //     var Rect = function() {
+                    if (iStart < 0 || iStart >= iCount) return;
+                    if (iEnd < 0 || iEnd >= iCount) return;
 
-        //     };
+                    if(this.iConnectBoxDirection === "LEFT") {
+                        this.arrBox[iStart].leftBox.lineTo = iEnd;
+                        this.arrBox[iStart].leftBox.lineDirection = iDirection;
+                    }
+                    else if(this.iConnectBoxDirection === "RIGHT") {
+                        this.arrBox[iStart].rightBox.lineTo = iEnd;
+                        this.arrBox[iStart].rightBox.lineDirection = iDirection;
+                    }
 
-        // })(document.getElementById("dashboard"));
+                    this.DrawBox();
+                },
+                MoveBox: function(iBoxIndex, iX, iY) {
 
-        var canvas;
-        var ctx;
+                    this.arrBox[iBoxIndex].left = this.arrBox[iBoxIndex].left + iX;
+                    this.arrBox[iBoxIndex].top =  this.arrBox[iBoxIndex].top  + iY;
 
-        function draw() {
+                    this.arrBox[iBoxIndex].leftBox.left = this.arrBox[iBoxIndex].leftBox.left + iX;
+                    this.arrBox[iBoxIndex].leftBox.top =  this.arrBox[iBoxIndex].leftBox.top  + iY;
 
-        };
+                    this.arrBox[iBoxIndex].rightBox.left = this.arrBox[iBoxIndex].rightBox.left + iX;
+                    this.arrBox[iBoxIndex].rightBox.top =  this.arrBox[iBoxIndex].rightBox.top  + iY;
 
-        function allowDrop(ev) {
-            ev.preventDefault();
-        };
+                    this.DrawBox();
+                },
+                DrawBox: function() {
+                    var iBoxCount = this.arrBox.length;
+                    
+                    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    for (var i = 0; i < iBoxCount; ++i) {
+
+                        var clsBox = this.arrBox[i];
+                        this.ctx.fillStyle = clsBox.backColor;
+                        this.ctx.fillRect(clsBox.left, clsBox.top, clsBox.width, clsBox.height);
+
+                        this.ctx.fillStyle = clsBox.leftBox.backColor;
+                        this.ctx.fillRect(clsBox.leftBox.left, clsBox.leftBox.top, clsBox.leftBox.width, clsBox.leftBox.height);
+
+                        this.ctx.fillStyle = clsBox.leftBox.backColor;
+                        this.ctx.fillRect(clsBox.rightBox.left, clsBox.rightBox.top, clsBox.rightBox.width, clsBox.rightBox.height);
+
+                        // lineTo에 연결된 요소의 인덱스 값이 존재할 경우 선을 그린다.
+                        if (clsBox.leftBox.lineTo >= 0) {
+
+                            var clsLineBox;
+
+                            if(clsBox.leftBox.lineDirection === 'LEFT')
+                                clsLineBox = this.arrBox[clsBox.leftBox.lineTo].leftBox;
+                            else
+                                clsLineBox = this.arrBox[clsBox.leftBox.lineTo].rightBox;
+
+                            this.DrawLine(clsBox.leftBox.left + clsBox.leftBox.width / 2, clsBox.leftBox.top + clsBox.leftBox.height / 2, clsLineBox.left + clsLineBox.width / 2, clsLineBox.top + clsLineBox.height / 2);
+
+                            // // 기준이 되는 요소가 왼쪽에 있을 경우
+                            // if ((clsBox.left + clsBox.width) < clsLineBox.left) {
+                            //     this.DrawLine(clsBox.left + clsBox.width, clsBox.top + clsBox.height / 2, clsLineBox.left, clsLineBox.top + clsLineBox.height / 2);
+                            // }
+                            // // 기준이 되는 요소가 오른쪽에 있을 경우
+                            // else if ((clsLineBox.left + clsLineBox.width) < clsBox.left) {
+                            //      this.DrawLine(clsLineBox.left + clsLineBox.width, clsLineBox.top + clsLineBox.height / 2, clsBox.left, clsBox.top + clsBox.height / 2);
+                            // }
+                            // // 기준이 되는 요소가 위에 있을 경우
+                            // else if ((clsBox.top + clsBox.height) < clsLineBox.top) {
+                            //     this.DrawLine(clsBox.left + clsBox.width / 2, clsBox.top + clsBox.height, clsLineBox.left + clsLineBox.width / 2, clsLineBox.top);
+                            // }
+                            // // 기준이 되는 요소가 아래에 있을 경우
+                            // else {
+                            //     this.DrawLine(clsLineBox.left + clsLineBox.width / 2, clsLineBox.top + clsLineBox.height, clsBox.left + clsBox.width / 2, clsBox.top);
+                            // }
+                        }
+
+                        if (clsBox.rightBox.lineTo >= 0) {
+                            var clsLineBox;
+
+                            if(clsBox.rightBox.lineDirection === 'LEFT')
+                                clsLineBox = this.arrBox[clsBox.rightBox.lineTo].leftBox;
+                            else
+                                clsLineBox = this.arrBox[clsBox.rightBox.lineTo].rightBox;
+
+                            this.DrawLine(clsBox.rightBox.left + clsBox.rightBox.width / 2, clsBox.rightBox.top + clsBox.rightBox.height / 2, clsLineBox.left + clsLineBox.width / 2, clsLineBox.top + clsLineBox.height / 2);
+                        }
+                    }
+                },
+                DrawLine: function(iStartX, iStartY, iEndX, iEndY) {
+
+                    var iHeadLen = 30;
+                    var iAngle = Math.atan2(iEndY - iStartY, iEndX - iStartX);
+
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(iStartX, iStartY);
+                    this.ctx.lineTo(iEndX, iEndY);
+
+                    this.ctx.lineTo(iEndX - iHeadLen * Math.cos(iAngle - Math.PI / 6), iEndY - iHeadLen * Math.sin(iAngle - Math.PI / 6));
+                    this.ctx.moveTo(iEndX, iEndY);
+                    this.ctx.lineTo(iEndX - iHeadLen * Math.cos(iAngle + Math.PI / 6), iEndY - iHeadLen * Math.sin(iAngle + Math.PI / 6));
+
+                    this.ctx.closePath();
+                    this.ctx.stroke();
+                },
+                mousedown: function(e) {
+                    this.startX = e.clientX - this.bb.left;
+                    this.startY = e.clientY - this.bb.top;
+
+                    var iBoxCount = this.arrBox.length;
+
+                    for (var i = 0; i < iBoxCount; ++i) {
+                        var clsBox = this.arrBox[i];
+                        
+                        // 마우스 다운한 영역에 사각형 요소가 있는지 검사
+                        // 사각형 요소에 속하는 영역일 경우 드레그가 가능한 상태로 변경
+                        if (this.startX > clsBox.left && this.startX < (clsBox.left + clsBox.width) && this.startY > clsBox.top && this.startY < (clsBox.top + clsBox.height)) {
+                            this.isDrag = true;
+                            this.iBoxIndex = i;
+                            this.iConnectBoxIndex = -1;
+                            break;
+                        }
+                        else if (this.startX > clsBox.leftBox.left && this.startX < (clsBox.leftBox.left + clsBox.leftBox.width) && this.startY > clsBox.leftBox.top && this.startY < (clsBox.leftBox.top + clsBox.leftBox.height)) {
+                            // 연결할 요소의 index가 없을 경우 기준 설정
+                            if(this.iConnectBoxIndex < 0) {
+                                this.iConnectBoxIndex = i;
+                                this.iConnectBoxDirection = "LEFT";
+                            }
+                            else if(this.iConnectBoxIndex == i) {
+                                this.iConnectBoxIndex = -1;
+                            }
+                            else {
+                                this.AddLine(this.iConnectBoxIndex, i, "LEFT");
+                            }
+                            
+                            break;
+                        }
+                        else if (this.startX > clsBox.rightBox.left && this.startX < (clsBox.rightBox.left + clsBox.rightBox.width) && this.startY > clsBox.rightBox.top && this.startY < (clsBox.rightBox.top + clsBox.rightBox.height)) {
+                            // 연결할 요소의 index가 없을 경우 기준 설정
+                            if(this.iConnectBoxIndex < 0) {
+                                this.iConnectBoxIndex = i;
+                                this.iConnectBoxDirection = "RIGHT";
+                            }
+                            else if(this.iConnectBoxIndex == i) {
+                                this.iConnectBoxIndex = -1;
+                            }
+                            else {
+                                this.AddLine(this.iConnectBoxIndex, i, "RIGHT");
+                            }
+
+                            break;
+                        }
+                        
+                    }
+                },
+                mousemove: function(e) {
+                    if (this.isDrag) {
+                        this.MoveBox(this.iBoxIndex, e.clientX - this.bb.left - this.startX, e.clientY - this.bb.top - this.startY);
+                        this.startX = e.clientX - this.bb.left;
+                        this.startY = e.clientY - this.bb.top;
+                    }
+                },
+                mouseup: function(e) {
+                    if (this.isDrag) {
+                        this.MoveBox(this.iBoxIndex, e.clientX - this.bb.left - this.startX, e.clientY - this.bb.top - this.startY);
+                        this.isDrag = false;
+                    }
+                }
+            };
+
+            canvas.addEventListener("mousemove", function(e) {
+                ret.mousemove(e);
+            });
+
+            canvas.addEventListener("mousedown", function(e) {
+                ret.mousedown(e);
+            });
+
+            canvas.addEventListener("mouseup", function(e) {
+                ret.mouseup(e);
+            });
+
+            return ret;
+        }
+
+        var clsDraw = new CDraw(document.getElementById("dashboard"));
 
         function drop(ev) {
             ev.preventDefault();
 
             var data = ev.dataTransfer.getData("text");
 
-            var width = document.getElementById(data).offsetWidth;
-            var height = document.getElementById(data).offsetHeight;
+            var width     = document.getElementById(data).offsetWidth;
+            var height    = document.getElementById(data).offsetHeight;
             var backColor = document.getElementById(data).style.backgroundColor;
 
-            var ctx = ev.target.getContext("2d");
+            clsDraw.AddBox(ev.clientX - clsDraw.bb.left, ev.clientY - clsDraw.bb.top, width, height, backColor);
+        };
 
-            ctx.fillStyle = backColor;
-            ctx.fillRect(ev.clientX - ev.target.getBoundingClientRect().left, ev.clientY - ev.target.getBoundingClientRect().top, width, height);
+        function allowDrop(ev) {
+            ev.preventDefault();
         };
 
         function drag(ev) {
-
-            // console.log(ev.target.id);
-
-            // ev.dataTransfer.setData("text", ev.target.id);
-            // dt.setDragImage(canvas, 25, 25);
-
-            var img = document.createElement("img");
             ev.dataTransfer.setData("text", ev.target.id);
-            //ev.dataTransfer.setDragImage(img, 0, 0);
-        };
-
-
-
-        function Element() {
-
-        };
-
-        function Rect() {
-
         };
     </script>
 </body>
