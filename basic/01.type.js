@@ -30,22 +30,22 @@ console.log('nullVar : '        + nullVar);
 
 // undefined는 변수를 선언만한 상태
 // null은 변수를 선언하고 빈 값이라고 할당한 상태
-console.log(emptyVar == nullVar);       // 값은 같다고 본므로 true
-console.log(emptyVar === nullVar);      // 타입은 다르므로 false
+// console.log(emptyVar == nullVar);       // 값은 같다고 봄으로 true
+// console.log(emptyVar === nullVar);      // 타입은 다르므로 false
 
-// https://blogfiles.pstatic.net/MjAxNzA1MTFfMTY3/MDAxNDk0NDc5MTIxNTg4.XUrQl_BhJwvtPCeHJUYPEcIZJExibuxWU7HRV7MN0oYg.XvY-q3APDnrMSxciUgcHvw3Te0OiBuI5w65rGEPTS9Ug.JPEG.briskly0415/123.jpg
+// // https://blogfiles.pstatic.net/MjAxNzA1MTFfMTY3/MDAxNDk0NDc5MTIxNTg4.XUrQl_BhJwvtPCeHJUYPEcIZJExibuxWU7HRV7MN0oYg.XvY-q3APDnrMSxciUgcHvw3Te0OiBuI5w65rGEPTS9Ug.JPEG.briskly0415/123.jpg
 
-if(!'') {
-    console.log('');
-}
+// if(!'') {
+//     console.log('');
+// }
 
-if(!0) {
-    console.log(0);
-}
+// if(!0) {
+//     console.log(0);
+// }
 
-if(!null) {
-    console.log(null);
-}
+// if(!null) {
+//     console.log(null);
+// }
 
 // ==  : 값만 비교 (타입이 다를 경우 타입을 변경)
 // === : 값과 타입까지 비교

@@ -12,10 +12,18 @@ function foo() {
         console.log(x + y + z);
     }
 
-    bar();
+    return bar;
 }
 
-foo();
+foo()();
+
+$(document).ready(function() {
+
+    var a = 0;
+    var b = 2;
+    
+
+});
 
 // 실행 컨텍스트의 구조
 // 1. Scope Chain
