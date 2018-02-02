@@ -26,10 +26,15 @@ console.log('sum 객체 : ', sum);
 // A 함수의 선언과 동시에 prototype 프로퍼티에는 prototype 객체가 할당 된다. prototype 객체에는 constructor, __proto__ 두개의 프로퍼티를 갖는다. constructor 함수 객체에는 선언한 함수를 가르킨다.
 // A 함수의 __proto__ 은 Function 함수 객체의 prototype 객체를 가르킨다.
 function A() {}
-console.log(Function.prototype === A.__proto__);
+console.log(A.__proto__      === Function.prototype);
+console.log(Object.__proto__ === Function.prototype);
+
 var B = new A();
-console.log(A.prototype === B.__proto__);
+console.log(B.__proto__ === A.prototype);
+
 var C = new Function();
+
+
 
 console.log(A === A.prototype.constructor);
 console.log(typeof A);
